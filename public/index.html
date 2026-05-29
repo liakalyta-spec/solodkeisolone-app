@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Передбачення</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(135deg, #f3f0ec, #e7d7c9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .box {
+      width: 140px;
+      height: 140px;
+      background: linear-gradient(135deg, #8B5E3C, #a0734a);
+      border-radius: 30px;
+      margin: 0 auto 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    h1 {
+      margin: 20px 0;
+      font-size: 28px;
+      color: #333;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    #result {
+      margin-top: 30px;
+      font-size: 18px;
+      color: #333;
+      min-height: 60px;
+      padding: 20px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1.6;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      animation: fadeIn 0.5s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 16px 40px;
+      font-size: 18px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #8B5E3C, #a0734a);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      width: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .info {
+      margin-top: 30px;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .loading {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #8B5E3C;
+      animation: pulse 1s infinite;
+      margin-right: 5px;
+    }
+
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 0.3;
+      }
+      50% {
+        opacity: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+    <div class="box"></div>
+
+    <h1>Твоє передбачення 🔮</h1>
+    <p class="subtitle">Натисніть кнопку щоб дізнатися свою долю</p>
+
+    <button id="predictButton" onclick="predict()">Отримати передбачення</button>
+
+    <div id="result"></div>
+
+    <div class="info">
+      <p>✨ Кожне передбачення унікальне</p>
+    </div>
+  </div>
+
+  <script>
+    let tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
+
+    // Set theme based on Telegram settings
+    if (tg.colorScheme === 'dark') {
+      document.body.style.background = 'linear-gradient(135deg, #2a2a2a, #1a1a1a)';
+    }
+
+    const predictions = [
+      "Сьогодні тебе чекає приємний сюрприз ✨",
+      "Ти отримаєш важливу новину дуже скоро 📩",
+      "Удача буде на твоєму боці 🍀",
+      "Зустріч змінить твій настрій ❤️",
+      "Не бійся зробити перший крок 🚀",
+      "Тебе чекає хороший день 🌞",
+      "Хтось думає про тебе прямо зараз 💭",
+      "Твої мрії будуть здійсненні 🌟",
+      "Чекай чудо в найближчі дні 🎁",
+      "Ситуація покращиться скоро 📈",
+      "Слід довіритись своїм інстинктам 🧠",
+      "Радість приходить несподівано 😊",
+      "Новий початок совсім близько 🆕"
+    ];
+
+    function predict() {
+      const button = document.getElementById('predictButton');
+      const resultDiv = document.getElementById('result');
+
+      // Disable button during animation
+      button.disabled = true;
+      resultDiv.innerHTML = '<div class="loading"></div> Завантаження...';
+
+      // Simulate delay for better UX
+      setTimeout(() => {
+        let random = Math.floor(Math.random() * predictions.length);
+        resultDiv.innerText = predictions[random];
+
+        // Haptic feedback
+        if (tg.HapticFeedback) {
+          tg.HapticFeedback.impactOccurred('medium');
+        }
+
+        // Send data back to bot (if needed)
+        if (tg.sendData) {
+          tg.sendData(JSON.stringify({
+            prediction: predictions[random],
+            timestamp: new Date().toISOString()
+          }));
+        }
+
+        button.disabled = false;
+      }, 600);
+    }
+
+    // Send init data to backend (optional)
+    if (tg.initData) {
+      console.log('Init Data:', tg.initData);
+    }
+  </script>
+
+</body>
+</html>
